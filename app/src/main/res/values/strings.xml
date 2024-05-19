@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">SignupTest</string>
+    <string name="title_activity_sign_page">SignPage</string>
+    <string name="title_activity_recover">RecoverActivity</string>
+</resources>
