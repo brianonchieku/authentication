@@ -1,8 +1,9 @@
 package com.example.signuptest
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.widget.Space
+//import android.widget.Space
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -21,7 +22,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.signuptest.ui.theme.SignupTestTheme
+//import com.example.signuptest.ui.theme.SignupTestTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -83,7 +84,7 @@ fun Test(){
                     Spacer(modifier = Modifier.size(20.dp))
 
                     Button(onClick = {
-                                     Toast.makeText(context, "login successful", Toast.LENGTH_SHORT).show()
+                        validate(context, userText, passText)
                     }, modifier = Modifier.width(200.dp)) {
                         Text(text = "Login")
 
@@ -116,6 +117,23 @@ fun Test(){
 
     }
 
+}
+
+fun validate(context: Context, userText: String, passText: String) {
+    when {
+        userText.isEmpty() -> {
+            Toast.makeText(context, "Username cannot be empty", Toast.LENGTH_SHORT).show()
+        }
+        passText.isEmpty() -> {
+            Toast.makeText(context, "Password cannot be empty", Toast.LENGTH_SHORT).show()
+        }
+        passText.length < 6 -> {
+            Toast.makeText(context, "Password must be at least 6 characters long", Toast.LENGTH_SHORT).show()
+        }
+        else -> {
+            Toast.makeText(context, "Login successful", Toast.LENGTH_SHORT).show()
+        }
+    }
 }
 
 @Preview(showBackground = true)
