@@ -10,15 +10,21 @@ import androidx.activity.viewModels
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -96,7 +102,9 @@ fun SignUp(userViewModel: UserViewModel){
 
             Card(modifier = Modifier
                 .fillMaxSize()
-                .padding(30.dp) , elevation = 20.dp, shape = RoundedCornerShape(20.dp)
+                .padding(30.dp)
+                .verticalScroll(rememberScrollState()) ,
+                elevation = 20.dp, shape = RoundedCornerShape(20.dp)
             ) {
                 Column(modifier = Modifier.wrapContentSize(), horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(text = "Register", fontSize = 20.sp, fontWeight = FontWeight.Bold)
@@ -108,7 +116,7 @@ fun SignUp(userViewModel: UserViewModel){
                             Text(text = "surname")
                         } , placeholder = {
                             Text(text = "surname")
-                        })
+                        }, keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text))
                     Spacer(modifier = Modifier.size(20.dp))
                     OutlinedTextField(value = namesText, onValueChange ={namesText=it}
                         , leadingIcon = {
@@ -117,7 +125,7 @@ fun SignUp(userViewModel: UserViewModel){
                             Text(text = "other names")
                         } , placeholder = {
                             Text(text = "other names")
-                        } )
+                        }, keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text) )
                     OutlinedTextField(value = userNameText, onValueChange ={userNameText=it}
                         , leadingIcon = {
                             Icon(painterResource(id = R.drawable.baseline_person_24), contentDescription =null )
@@ -133,7 +141,7 @@ fun SignUp(userViewModel: UserViewModel){
                             Text(text = "password")
                         } , placeholder = {
                             Text(text = "password")
-                        } )
+                        }, visualTransformation = PasswordVisualTransformation())
                     OutlinedTextField(value = confirmPasswordText, onValueChange ={confirmPasswordText=it}
                         , leadingIcon = {
                             Icon(painterResource(id = R.drawable.baseline_lock_24), contentDescription =null )
@@ -141,7 +149,7 @@ fun SignUp(userViewModel: UserViewModel){
                             Text(text = "confirm password")
                         } , placeholder = {
                             Text(text = "confirm password")
-                        } )
+                        }, visualTransformation = PasswordVisualTransformation() )
                     OutlinedTextField(value = emailText, onValueChange ={emailText=it}
                         , leadingIcon = {
                             Icon(painterResource(id = R.drawable.baseline_email_24), contentDescription =null )
@@ -149,7 +157,7 @@ fun SignUp(userViewModel: UserViewModel){
                             Text(text = "email")
                         } , placeholder = {
                             Text(text = "email")
-                        } )
+                        }, keyboardOptions = KeyboardOptions(keyboardType=KeyboardType.Email) )
                     OutlinedTextField(value = phoneText, onValueChange ={phoneText=it}
                         , leadingIcon = {
                             Icon(painterResource(id = R.drawable.baseline_local_phone_24), contentDescription =null )
@@ -157,7 +165,8 @@ fun SignUp(userViewModel: UserViewModel){
                             Text(text = "phone number")
                         } , placeholder = {
                             Text(text = "phone number")
-                        } )
+                        },
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number))
                     ExposedDropdownMenuBox(
                         expanded = expanded,
                         onExpandedChange = { expanded = !expanded }
@@ -195,14 +204,14 @@ fun SignUp(userViewModel: UserViewModel){
                             Text(text = "answer")
                         } , placeholder = {
                             Text(text = "answer")
-                        } )
+                        }, keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text) )
 
                     Spacer(modifier = Modifier.size(20.dp))
 
                     Button(onClick = {
                         if (surnameText.isNotEmpty() && namesText.isNotEmpty() && userNameText.isNotEmpty()
                             && passwordText.isNotEmpty() && confirmPasswordText.isNotEmpty() && emailText.isNotEmpty()
-                            && phoneText.isNotEmpty() && questionText.isNotEmpty() && answerText.isNotEmpty()
+                            && phoneText.isNotEmpty() && answerText.isNotEmpty()
                         ) {
                             if (passwordText == confirmPasswordText && passwordText.length > 6) {
                                 val user = Users(
@@ -212,7 +221,7 @@ fun SignUp(userViewModel: UserViewModel){
                                     password = passwordText,
                                     email = emailText,
                                     phone = phoneText,
-                                    question = questionText,
+                                    question = selectedQuestion,
                                     answer = answerText
                                 )
                                 coroutineScope.launch {

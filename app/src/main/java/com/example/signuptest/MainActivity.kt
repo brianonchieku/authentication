@@ -1,5 +1,6 @@
 package com.example.signuptest
 
+import android.app.Application
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -7,10 +8,12 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -19,23 +22,36 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.signuptest.ui.theme.UserDatabase
+import com.example.signuptest.ui.theme.UserViewModel
+import com.example.signuptest.ui.theme.Users
+import com.example.signuptest.ui.theme.UsersDao
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+
 //import com.example.signuptest.ui.theme.SignupTestTheme
 
 class MainActivity : ComponentActivity() {
+    private lateinit var database: UserDatabase
+    private val userViewModel: UserViewModel by viewModels()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        database = UserDatabase.getDatabase(this)
         setContent {
-            Test()
+            Test(userViewModel)
 
         }
     }
 }
 
 @Composable
-fun Test(){
+fun Test(userViewModel: UserViewModel){
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         Image(painter = painterResource(id = R.drawable.lavender3)
             , contentDescription =null, modifier = Modifier.fillMaxSize(), contentScale = ContentScale.Crop )
@@ -45,6 +61,9 @@ fun Test(){
                 .padding(30.dp), elevation = 20.dp, shape = RoundedCornerShape(20.dp)
             ) {
                 val context= LocalContext.current
+                val coroutineScope = rememberCoroutineScope()
+                val db =UserDatabase.getDatabase(context)
+                val userDao = db.userDao()
                 var userText by remember{
                     mutableStateOf("")
                 }
@@ -65,7 +84,7 @@ fun Test(){
                             Text(text = "user name")
                         } , placeholder = {
                             Text(text = "user name")
-                        })
+                        }, keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text))
                     Spacer(modifier = Modifier.size(20.dp))
                     OutlinedTextField(value = passText, onValueChange ={passText=it}
                         , leadingIcon = {
@@ -74,7 +93,7 @@ fun Test(){
                             Text(text = "password")
                         } , placeholder = {
                             Text(text = "password")
-                        } )
+                        }, visualTransformation = PasswordVisualTransformation() )
                     Spacer(modifier = Modifier.size(5.dp))
                     Row(modifier = Modifier.wrapContentWidth(), verticalAlignment = Alignment.CenterVertically) {
                         Checkbox(checked = true, onCheckedChange ={checkText=it} )
@@ -84,7 +103,17 @@ fun Test(){
                     Spacer(modifier = Modifier.size(20.dp))
 
                     Button(onClick = {
-                        validate(context, userText, passText)
+                        if (userText.isNotEmpty() && passText.isNotEmpty()) {
+                            coroutineScope.launch {
+                                // Check if the user exists in the database
+                                val user = userViewModel.getUser(userText, passText)
+                                userViewModel.login(userText, passText)
+                                Toast.makeText(context, "Login successful", Toast.LENGTH_SHORT).show()
+                            }
+                        } else {
+                            Toast.makeText(context, "Please fill all fields", Toast.LENGTH_SHORT).show()
+                        }
+
                     }, modifier = Modifier.width(200.dp)) {
                         Text(text = "Login")
 
@@ -119,26 +148,12 @@ fun Test(){
 
 }
 
-fun validate(context: Context, userText: String, passText: String) {
-    when {
-        userText.isEmpty() -> {
-            Toast.makeText(context, "Username cannot be empty", Toast.LENGTH_SHORT).show()
-        }
-        passText.isEmpty() -> {
-            Toast.makeText(context, "Password cannot be empty", Toast.LENGTH_SHORT).show()
-        }
-        passText.length < 6 -> {
-            Toast.makeText(context, "Password must be at least 6 characters long", Toast.LENGTH_SHORT).show()
-        }
-        else -> {
-            Toast.makeText(context, "Login successful", Toast.LENGTH_SHORT).show()
-        }
-    }
-}
+
 
 @Preview(showBackground = true)
 @Composable
 fun DefaultPreview() {
-    Test()
+    val userViewModel = UserViewModel(Application())
+    Test(userViewModel = userViewModel)
 
 }

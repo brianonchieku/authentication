@@ -1,6 +1,9 @@
 package com.example.signuptest.ui.theme
 
 import androidx.lifecycle.LiveData
+import androidx.room.Query
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 class UserRepository(private val usersDao: UsersDao) {
 
@@ -13,4 +16,18 @@ class UserRepository(private val usersDao: UsersDao) {
     suspend fun getUserByEmail(email: String): Users? {
         return usersDao.getUserByEmail(email)
     }
+
+    suspend fun getUser(username: String, password: String): Users? {
+        return usersDao.getUser(username, password)
+    }
+
+    suspend fun updateUser(user: Users) {
+        usersDao.updateUser(user)
+
+    }
+    suspend fun checkSecurityQuestionAnswer(question: String, answer: String): Users?{
+       return usersDao.checkSecurityQuestionAnswer(question, answer)
+
+    }
+
 }
