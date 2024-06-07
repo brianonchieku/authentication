@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
@@ -134,37 +135,27 @@ fun Recover(userViewModel: UserViewModel){
 
                     Spacer(modifier = Modifier.size(20.dp))
 
-                    Button(onClick = {
-                        if (selectedQuestion.isNotEmpty() && answer.isNotEmpty()) {
-                            // Call ViewModel function to check security question and answer
-                            val isCorrect = userViewModel.checkSecurityQuestionAnswer(selectedQuestion, answer)
-                            if (isCorrect) {
-                                // Proceed with updating password
-                                if (newPass.isNotEmpty() && confirmNewPass.isNotEmpty() && newPass == confirmNewPass) {
-                                    // Call ViewModel function to update password
-                                    coroutineScope.launch {
-                                        val success = userViewModel.recoverPassword(selectedQuestion, answer, newPass)
-                                        if (success) {
-                                            Toast.makeText(context, "Password updated", Toast.LENGTH_SHORT).show()
-                                            // Navigate to the login screen or any other screen as needed
-                                            val intent = Intent(context, MainActivity::class.java)
-                                            context.startActivity(intent)
-                                        } else {
-                                            Toast.makeText(context, "Failed to update password", Toast.LENGTH_SHORT).show()
-                                        }
+                    Button(
+                        onClick = {
+                            if (selectedQuestion.isNotEmpty() && answer.isNotEmpty()) {
+                                coroutineScope.launch {
+                                    val result = userViewModel.recoverPassword(selectedQuestion, answer, newPass).observeAsState()
+                                    success = result.value
+                                    if (success == true) {
+                                        Toast.makeText(context, "Password updated", Toast.LENGTH_SHORT).show()
+                                        val intent = Intent(context, MainActivity::class.java)
+                                        context.startActivity(intent)
+                                    } else {
+                                        Toast.makeText(context, "Failed to update password", Toast.LENGTH_SHORT).show()
                                     }
-                                } else {
-                                    Toast.makeText(context, "Passwords do not match", Toast.LENGTH_SHORT).show()
                                 }
                             } else {
-                                Toast.makeText(context, "Incorrect security question or answer", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(context, "Please fill all fields", Toast.LENGTH_SHORT).show()
                             }
-                        } else {
-                            Toast.makeText(context, "Please fill all fields", Toast.LENGTH_SHORT).show()
-                        }
-                    }, modifier = Modifier.width(200.dp)) {
+                        },
+                        modifier = Modifier.width(200.dp)
+                    ) {
                         Text(text = "SAVE")
-
                     }
                     Spacer(modifier = Modifier.size(10.dp))
                     Text(text = "login", modifier = Modifier.clickable {

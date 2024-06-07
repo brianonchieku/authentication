@@ -58,4 +58,19 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
         }
         return result
     }
+
+    fun recoverPassword(selectedQuestion: String, answer: String, newPassword: String): LiveData<Boolean> {
+        val result = MutableLiveData<Boolean>()
+        viewModelScope.launch(Dispatchers.IO) {
+            val user = repository.checkSecurityQuestionAnswer(selectedQuestion, answer)
+            if (user != null) {
+                user.password = newPassword
+                repository.updateUser(user)
+                result.postValue(true)
+            } else {
+                result.postValue(false)
+            }
+        }
+        return result
+    }
 }
